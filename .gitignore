@@ -1,0 +1,16 @@
+# notebook files
+*.ipynb
+# Ignore the DS_Store files
+*.DS_Store
+*.dat
+
+#ignore all pickle data files
+*.p
+
+# ignore julia data files
+*.jld2
+*.h5
+#ignore all pdfs
+*.pdf
+*.png
+
