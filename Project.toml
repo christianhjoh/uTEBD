@@ -1,0 +1,20 @@
+name = "uTEBD"
+uuid = "d860ffec-cfcf-436b-bdd3-09fa5ad7387b"
+version = "0.1.0"
+authors = ["Christian MPB <christianhjoh@gmail.com>"]
+
+[deps]
+Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"
+ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+
+[compat]
+Arpack = "0.5.4"
+CUDA = "5.9.5"
+ITensorMPS = "0.3.25"
+ITensors = "0.9.15"
+LinearAlgebra = "1.12.0"
+Metal = "1.9.1"
