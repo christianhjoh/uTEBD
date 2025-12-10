@@ -452,7 +452,7 @@ end
 
 function TEBD(sysDef;time_lim = Inf)
     timeStart = time()
-    global stop_loop = false
+    global stop_evo = false
     gpuFlag = sysDef["gpuFlag"]
     ΓA = gpuFlag ? GPU(sysDef["state"]["ΓA"]) : sysDef["state"]["ΓA"]
     ΓB = gpuFlag ? GPU(sysDef["state"]["ΓB"]) : sysDef["state"]["ΓB"]
@@ -761,7 +761,7 @@ function TEBD(sysDef;time_lim = Inf)
             end
         end
         WTbuffer = 30
-        if (time()-timeStart + WTbuffer >time_lim && iter>3) || stop_loop
+        if (time()-timeStart + WTbuffer >time_lim && iter>3) || stop_evo
             # compute observables and adapt output
             if ObFlag
                 if iter != ObsSteps[iterObs-1]
@@ -796,7 +796,7 @@ function TEBD(sysDef;time_lim = Inf)
             else
                 tlist = tlist[iter]
             end
-            if stop_loop
+            if stop_evo
                 wrt("!!!! computaiton stopped externally !!!!")
             else
                 wrt("!!!!Computation stopped with $(WTbuffer)$sec left of wall time !!!!")
