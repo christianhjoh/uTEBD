@@ -14,11 +14,20 @@ elseif Sys.isapple()
 end
 import ProgressMeter as PM
 
-# Global variable to hold the output function
-io = stdout
+# function to write to a specified output stream
+const io_ref = Ref{Union{Nothing,IO}}(nothing)
+
+function set_io!(io::IO)
+    io_ref[] = io
+end
 
 function wrt(str::String)
-    println(io,str)
+    io = io_ref[]
+    if io === nothing || !isopen(io)
+        io = stdout          # safe fallback
+        io_ref[] = io
+    end
+    println(io, str)
     flush(io)
 end
 
