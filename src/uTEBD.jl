@@ -6,6 +6,7 @@ using Arpack
 using Measures
 using ITensors, ITensorMPS
 using ITensors:cpu, Diag
+using Suppressor
 import CUDA as cuda
 if Sys.islinux()
 elseif Sys.isapple()
@@ -234,7 +235,7 @@ function CanonGauge(state;co=1e-16)
     end
 end
 
-function iTEBDstep(ΓA, λA, ΓB, λB, U, sites; maxdim::Int64=512, cutoff::Float64=1e-10)
+function TEBDstep(ΓA, λA, ΓB, λB, U, sites; maxdim::Int64=512, cutoff::Float64=1e-10)
     # Use ITensor's dimension functions more efficiently
     γ = Index(dim(commonind(ΓA, λB)), "γ_bond")
 
@@ -440,7 +441,7 @@ function SV(λ)
     return diag(array(λtemp))
 end
 
-function iTEBD(sysDef;time_lim = Inf)
+function TEBD(sysDef;time_lim = Inf)
     timeStart = time()
     global stop_loop = false
     gpuFlag = sysDef["gpuFlag"]
@@ -628,9 +629,9 @@ function iTEBD(sysDef;time_lim = Inf)
             H = gpuFlag ? GPU(Hcpu) : Hcpu
         end
         # Second order Trotter scheme
-        ΓA,λA,ΓB = iTEBDstep(ΓA,λA,ΓB,λB,U1,sites,cutoff=co,maxdim=maxD)
-        ΓB,λB,ΓA = iTEBDstep(ΓB,λB,ΓA,λA,U2,sites,cutoff=co,maxdim=maxD)
-        ΓA,λA,ΓB = iTEBDstep(ΓA,λA,ΓB,λB,U1,sites,cutoff=co,maxdim=maxD)
+        ΓA,λA,ΓB = TEBDstep(ΓA,λA,ΓB,λB,U1,sites,cutoff=co,maxdim=maxD)
+        ΓB,λB,ΓA = TEBDstep(ΓB,λB,ΓA,λA,U2,sites,cutoff=co,maxdim=maxD)
+        ΓA,λA,ΓB = TEBDstep(ΓA,λA,ΓB,λB,U1,sites,cutoff=co,maxdim=maxD)
 
         # update state
         state["ΓA"]=ΓA
@@ -866,7 +867,7 @@ function SysUpd(sysInit::Dict{String,Any},keys::Vector{String},vals::Vector{})
 end
 
 # function to apply a bra and ket gate to a 2-site density matrix and perform the truncated svd
-function ρiTEBDstep(ρl,midI,ρr,outerI,Uket,Ubra,sites;maxD::Int64=512,co::Float64=1e-10)
+function ρTEBDstep(ρl,midI,ρr,outerI,Uket,Ubra,sites;maxD::Int64=512,co::Float64=1e-10)
     # Contracted tensor 
     θ = noprime(prime(ρl,outerI) * ρr * Uket*Ubra,prime(sites))
     # svd 
@@ -1005,9 +1006,9 @@ function iρβ(Hfct,EnT,SiteType,o1,o2;BD=512,pm=false)
             β += dτ
             push!(βlst,β)
             # evolve with second order trotter
-            ρA,mI,ρB,λmid = ρiTEBDstep(ρA,mI,ρB,oI,U1ket,U1bra,phys,maxD=BD)
-            ρB,oI,ρA,λout = ρiTEBDstep(ρB,oI,ρA,mI,U2ket,U2bra,phys,maxD=BD)
-            ρA,mI,ρB,λmid = ρiTEBDstep(ρA,mI,ρB,oI,U1ket,U1bra,phys,maxD=BD)
+            ρA,mI,ρB,λmid = ρTEBDstep(ρA,mI,ρB,oI,U1ket,U1bra,phys,maxD=BD)
+            ρB,oI,ρA,λout = ρTEBDstep(ρB,oI,ρA,mI,U2ket,U2bra,phys,maxD=BD)
+            ρA,mI,ρB,λmid = ρTEBDstep(ρA,mI,ρB,oI,U1ket,U1bra,phys,maxD=BD)
             # normalize
             ρA,ρB,maxEV_proj = ρiRenorm(ρA,ρB,phys)
             
@@ -1071,8 +1072,8 @@ function tstState(n::Int,siteType::String;gpuFlag::Bool=false,Ndim=4)
     λB[β=>1,β'=>1] = 1.0 
 
     for i in 1:100 
-        ΓA,λA,ΓB = iTEBDstep(ΓA,λA,ΓB,λB,U,sites,cutoff=1E-16,maxdim=n)
-        ΓB,λB,ΓA = iTEBDstep(ΓB,λB,ΓA,λA,U,sites,cutoff=1E-16,maxdim=n)
+        ΓA,λA,ΓB = TEBDstep(ΓA,λA,ΓB,λB,U,sites,cutoff=1E-16,maxdim=n)
+        ΓB,λB,ΓA = TEBDstep(ΓB,λB,ΓA,λA,U,sites,cutoff=1E-16,maxdim=n)
         if dims(λA)==dims(λB) && dims(λA)[1]==n
             break
         end

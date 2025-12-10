@@ -1,6 +1,7 @@
 using Test
 using uTEBD
 
+
 @testset "uTEBD basic tests" begin
-    @test ismodule(iTEBD)
+    @test isdefined(uTEBD, :iTEBDstep)
 end
