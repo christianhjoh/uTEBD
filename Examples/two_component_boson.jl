@@ -112,7 +112,7 @@ parameters = let
     # pm: monitoring done through the ProgressMonitor (true) or written to uT.io . On HPC do NOT use true 
     # MonitorObs is the observables that are monitored. Only observables present in Obs can be monitored
     MonitorObs = filter!(!isempty,vcat([Obs["H"] ? "H" : [], Obs["λ"] ? "λ" : []],(length(Obs["OneSite"])>0 ? Obs["OneSite"] : [])))  
-    monitor = Dict{String,Any}("flag"=>true, "pm"=>false && !Sys.islinux(),"Obs"=>MonitorObs)
+    monitor = Dict{String,Any}("flag"=>true,"Obs"=>MonitorObs)
     convergence = Dict{String,Any}("flag"=>false)
     
     Dict{String,Any}("Total_time"=>T, "U"=>U,"Uab"=>Uab, "J"=>J,"τ"=>τ, "Nboson"=>Nboson,"μ"=>μ,

@@ -612,9 +612,6 @@ function TEBD(sysDef;time_lim = Inf)
     ϵλ = 10
     ϵΓ = 10
     converged = false
-    if mflag && monitor["pm"]
-        prog=PM.Progress(Int(Nsteps); showspeed=true)
-    end
     if cflag
         conv_2step = 0
         conv = Dict{String,Any}()
@@ -724,7 +721,7 @@ function TEBD(sysDef;time_lim = Inf)
                 #     end
                 # end
                 
-                if mflag && !monitor["pm"]
+                if mflag
                     str = "iter: $(iter)/$(Nsteps), sim. time: $(round(tlist[iter],sigdigits=2))/$(round(tlist[end],sigdigits=2)), time for $(obsΔ) steps: $(round(time()-t0,sigdigits=2)) sec,"
                     if "λ" ∈ monitor["Obs"]
                         str *= " Bond dim. = $(length(obs.λ[iterObs-1])),"
@@ -803,9 +800,6 @@ function TEBD(sysDef;time_lim = Inf)
             end
             flush(stdout)
             break
-        end
-        if mflag && monitor["pm"]
-            PM.next!(prog)
         end
     end
     # move results to cpu

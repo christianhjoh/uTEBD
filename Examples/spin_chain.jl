@@ -46,7 +46,7 @@ eval(Meta.parse(Ham_str))
 parameters = let
     τ = 1 # Overall energy scale 
     T = 6 # total simulation time
-    step = 0.005 # step size 
+    step = 0.01 # step size 
     Nsteps = Int(round(T/step)) 
     
     # Define observables
@@ -63,7 +63,7 @@ parameters = let
     # pm: monitoring done through the ProgressMonitor (true) or written to uT.io . On HPC do NOT use true 
     # MonitorObs is the observables that are monitored. Only observables present in Obs can be monitored
     MonitorObs = filter!(!isempty,vcat([Obs["H"] ? "H" : [], Obs["λ"] ? "λ" : []],(length(Obs["OneSite"])>0 ? Obs["OneSite"] : [])))  
-    monitor = Dict{String,Any}("flag"=>true, "pm"=>false && !Sys.islinux(),"Obs"=>MonitorObs)
+    monitor = Dict{String,Any}("flag"=>true,"Obs"=>MonitorObs)
     
     # Convergence stops the evolution if steady state is reached
     # Standard use case is for automatically stopping an imaginary time evolution 
@@ -121,7 +121,7 @@ uT.wrt("Normalization: $(round(uT.twoBodyObs(Init_state,"Id"),sigdigits=3))\nZ-m
 gs_param = copy(parameters)
 gs_param["step"] = parameters["step"]/parameters["τ"]
 gs_param["Nsteps"] = 100000
-gs_param["Obs"] = Dict{String,Any}("flag"=>true,"Δ"=>1000,"λ"=>true,"H"=>true)
+gs_param["Obs"] = Dict{String,Any}("flag"=>true,"Δ"=>10,"λ"=>true,"H"=>true)
 gs_param["monitor"] = Dict{String,Any}("flag"=>false)
 gs_param["convergence"] = Dict{String,Any}("flag"=>true,"state"=>true,"stateΔ"=>1E-10,"SV"=>true,"SVΔ"=>1E-10)
 # to initialize the calculation build the dictionary with SysInit.
@@ -130,7 +130,7 @@ gs_param["convergence"] = Dict{String,Any}("flag"=>true,"state"=>true,"stateΔ"=
 # otherwise set it to false. If time_dep = true then Hevo and H has to be functions that takes as only input a time value.
 # The third argument is the parameters dictionary 
 # Additional optional arguments can be found in the source code. 
-setupInit=uT.SysInit(Init_state,(time_dep = false, H = H0),gs_param,imag=true);
+setupInit = uT.SysInit(Init_state,(time_dep = false, H = H0),gs_param,imag=true);
 t0 = time()
 
 uT.wrt("Preparing correlated initial state")
@@ -202,7 +202,7 @@ uT.wrt("------------------------- Time evolution --------------------")
 if @isdefined(walltime)
     tlim = walltime-(time()-StartComputeTime)
 else 
-tlim = 400
+    tlim = 400
 end
 uT.wrt("Time limit for uTEBD calclation is: $(round(tlim-30,digits=2)) seconds")
 
@@ -217,9 +217,9 @@ end
 t0 = time()
 if isinteractive()
     # do calculation asynchronously to allow make it possible to stop it interactive by setting uT.stop_evo = true
-    quenched = @async uT.TEBD(setup,time_lim = tlim);
+    quenched = @async uT.TEBD(setup,time_lim = tlim)
 else
-    quenched = uT.TEBD(setup,time_lim = tlim);
+    quenched = uT.TEBD(setup,time_lim = tlim)
     uT.wrt("Computing time-evolution took: $(round(time()-t0,digits=2)) seconds")
 end
 
