@@ -2,7 +2,7 @@
 
 julia_version = "1.12.2"
 manifest_format = "2.0"
-project_hash = "fd95fce58daca859e5235cf43fc6fc9a5244f2a3"
+project_hash = "8e4cf4da027e5597bee4dba16f3697de78f0de5b"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -861,12 +861,6 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 version = "1.11.0"
 
-[[deps.ProgressMeter]]
-deps = ["Distributed", "Printf"]
-git-tree-sha1 = "fbb92c6c56b34e1a2c4c36058f68f332bec840e7"
-uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "1.11.0"
-
 [[deps.REPL]]
 deps = ["InteractiveUtils", "JuliaSyntaxHighlighting", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -1214,7 +1208,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 version = "17.7.0+0"
 
 [[deps.uTEBD]]
-deps = ["Arpack", "CUDA", "ITensorMPS", "ITensors", "LinearAlgebra", "Measures", "Metal", "ProgressMeter", "Suppressor"]
+deps = ["Arpack", "CUDA", "ITensorMPS", "ITensors", "LinearAlgebra", "Measures", "Metal", "Suppressor", "Test"]
 path = "."
 uuid = "d860ffec-cfcf-436b-bdd3-09fa5ad7387b"
 version = "0.1.0"

@@ -12,7 +12,6 @@ if Sys.islinux()
 elseif Sys.isapple()
     import Metal as mtl
 end
-import ProgressMeter as PM
 
 # function to write to a specified output stream
 const io_ref = Ref{Union{Nothing,IO}}(nothing)
@@ -954,7 +953,7 @@ function ρ3ρ(ρA,ρB,maxEV_proj,phys)
 end
 
 # Starting from infinite temperature, cool down the system until the target energy (EnT) is reached 
-function iρβ(Hfct,EnT,SiteType,o1,o2;BD=512,pm=false) 
+function iρβ(Hfct,EnT,SiteType,o1,o2;BD=512) 
     # set up legs initial tensors
     phys = siteinds(SiteType,4)
     oI = Index(1,"outerI")
@@ -985,9 +984,6 @@ function iρβ(Hfct,EnT,SiteType,o1,o2;BD=512,pm=false)
     obs0 = ComplexF64.(ρobs(ρA,ρB,maxEV_proj,phys,Hket,o1,o2))
     obslst = [obs0, obs0]
     ρVec = [[oI,ρA,mI,ρB], [oI,ρA,mI,ρB]]
-    if pm
-        prog=PM.Progress(Int(nloop); showspeed=true)
-    end
     # loops performed with increasing resolution (set by dτ)
     for i in 1:5
         pop!(obslst)
@@ -1015,9 +1011,6 @@ function iρβ(Hfct,EnT,SiteType,o1,o2;BD=512,pm=false)
             push!(obslst,obs0)
             circshift!(ρVec,1)
             ρVec[end]=[oI,ρA,mI,ρB]
-        end
-        if pm
-            PM.next!(prog)
         end
     end
     obslst =reduce(hcat,obslst)
