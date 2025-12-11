@@ -847,22 +847,18 @@ function SysInit(state::Dict{String, Any},Ht,parameters::Dict{String,Any};imag::
     end
     # check that observeable dictionary is initialised
     if haskey(par,"Obs")
-        if !haskey(par["Obs"],"flag")
-            par["Obs"]["flag"] = false
-        end
+        par["Obs"] = merge(Dict{String,Any}("flag"=>false,"Δ"=>10,"λ"=>true,"H"=>true,"ρ1"=>false,"ρ2"=>false,"ρ3"=>false,"OneSite"=>[],"2p-corr"=>[]),par["Obs"])
     else
         par["Obs"] = Dict{String,Any}("flag"=>false)
     end
 
     # check that convergence dictionary is initialised
     if haskey(par,"convergence")
-        if !haskey(par["convergence"],"flag")
-            par["convergence"]["flag"] = false
-        end
+        par["convergence"] = merge(Dict{String,Any}("flag"=>true,"state"=>false,"stateΔ"=>1E-8,"SV"=>false,"SVΔ"=>1E-8),par["convergence"]) 
     else
         par["convergence"] = Dict{String,Any}("flag"=>false)
     end
-        
+    merge(Dict{String,Any}("flag"=>false,"Δ"=>10,"λ"=>true,"H"=>true,"ρ1"=>false,"ρ2"=>false,"ρ3"=>false,"OneSite"=>[],"2p-corr"=>[]),par["convergence"]) 
     return merge(Dict{String,Any}("t0"=>0.0,"U1"=>U1,"U2"=>U2,"state"=>state,"H"=>H, "gpuFlag"=>gpu,"descriptor"=>descriptor,
             "folder"=>folder,"SavePoints"=>SavePoints,"imag"=>imag,"Ht"=> Ht),par)
 end

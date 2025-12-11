@@ -12,7 +12,6 @@ if isinteractive()
     using CairoMakie
     using LaTeXStrings
     import MakieExtra as ME
-    using Revise
 end
 
 import uTEBD as uT
@@ -57,7 +56,7 @@ parameters = let
     # ρ2/ρ3 is wether or not to compute the two and three-body density matrices
     # TwoSite is a list of the two-site observables that should be computed. They must all be connected to operators defined for the siteType
     # 2p-corr is a list of all the two-point spatial correlation functions. Each element of the list should be of the form [o1,o2,d] which computes the correlation <o1_i o2_i_j> up to j=d. Again the operators should defined for the siteType  
-    Obs = Dict{String,Any}("flag"=>true,"Δ"=>10,"λ"=>true,"H"=>true,"ρ1"=>false,"ρ2"=>false,"ρ3"=>false,"OneSite"=>["Z","X","Y"],"2p-corr"=>[["Z","Z",100],["X","X",100]])
+    Obs = Dict{String,Any}("flag"=>true,"Δ"=>10,"λ"=>true,"H"=>true,"ρ1"=>false,"ρ2"=>false,"ρ3"=>false,"OneSite"=>["Z","X","Y"],"2p-corr"=>[["Z","Z",50],["X","X",50]])
     
     # observables to be monitored during the evolution. 
     # flag: turns monitoring on/off
@@ -70,7 +69,7 @@ parameters = let
     # Standard use case is for automatically stopping an imaginary time evolution 
     convergence = Dict{String,Any}("flag"=>false)
     
-    Dict{String,Any}("Total_time"=>T,"τ"=>τ, "Ω"=>0.75, "ϵ"=>0., "δ"=>0.06,"δ0"=>0.0,"Hamiltonian"=>Ham_str,
+    Dict{String,Any}("Total_time"=>T,"τ"=>τ, "Ω"=>0.8, "ϵ"=>0.025641025641025647, "δ"=>0.2,"δ0"=>0.0,"Hamiltonian"=>Ham_str,
         "maxBD"=>200, "cutoff"=>1E-16, "step"=>step,"Nsteps"=>Nsteps, "Obs"=>Obs,"monitor"=>monitor,"convergence"=>convergence)
 end
 
@@ -122,7 +121,7 @@ uT.wrt("Normalization: $(round(uT.twoBodyObs(Init_state,"Id"),sigdigits=3))\nZ-m
 gs_param = copy(parameters)
 gs_param["step"] = parameters["step"]/parameters["τ"]
 gs_param["Nsteps"] = 100000
-#gs_param["Obs"] = Dict{String,Any}("flag"=>false)
+gs_param["Obs"] = Dict{String,Any}("flag"=>true,"Δ"=>1000,"λ"=>true,"H"=>true)
 gs_param["monitor"] = Dict{String,Any}("flag"=>false)
 gs_param["convergence"] = Dict{String,Any}("flag"=>true,"state"=>true,"stateΔ"=>1E-10,"SV"=>true,"SVΔ"=>1E-10)
 # to initialize the calculation build the dictionary with SysInit.
@@ -133,24 +132,12 @@ gs_param["convergence"] = Dict{String,Any}("flag"=>true,"state"=>true,"stateΔ"=
 # Additional optional arguments can be found in the source code. 
 setupInit=uT.SysInit(Init_state,(time_dep = false, H = H0),gs_param,imag=true);
 t0 = time()
-Niter = 0
-function fineGraining(dat,setup)
-    setupNew = setup
-    datNew = dat
-    for i in 1:Niter
-        setupNew = uT.SysUpd(setupNew,["state"; "step"], [uT.CanonGauge(datNew["state"]); setupNew["step"]/10])
-        datNew = uT.TEBD(setupNew)
-        uT.wrt("Step $(i+1)/$(Niter+1) of initial state preparation done")
-    end
-    datNew, setupNew
-end
 
 uT.wrt("Preparing correlated initial state")
-TFIinit = uT.TEBD(setupInit);
-TFIinit, setupInit = fineGraining(TFIinit,setupInit)
-setupInit = uT.SysUpd(setupInit,["state"], [uT.CanonGauge(TFIinit["state"])])
+Init = uT.TEBD(setupInit);
+setupInit = uT.SysUpd(setupInit,["state"], [uT.CanonGauge(Init["state"])])
 uT.wrt("Preparation of initial state took: $(round(time()-t0,sigdigits=2)) seconds")
-uT.wrt("Normalization: $(round(uT.twoBodyObs(TFIinit["state"],"Id"),sigdigits=3))\nZ-mag: $(round(uT.twoBodyObs(TFIinit["state"],"Z"),sigdigits=3))\nX-mag: $(round(uT.twoBodyObs(TFIinit["state"],"X"),sigdigits=3))\nY-mag: $(round(uT.twoBodyObs(TFIinit["state"],"Y"),sigdigits=3))\nEnergy: $(round(uT.twoBodyObs(TFIinit["state"],H0),sigdigits=3))")
+uT.wrt("Normalization: $(round(uT.twoBodyObs(Init["state"],"Id"),sigdigits=3))\nZ-mag: $(round(uT.twoBodyObs(Init["state"],"Z"),sigdigits=3))\nX-mag: $(round(uT.twoBodyObs(Init["state"],"X"),sigdigits=3))\nY-mag: $(round(uT.twoBodyObs(Init["state"],"Y"),sigdigits=3))\nEnergy: $(round(uT.twoBodyObs(Init["state"],H0),sigdigits=3))")
 
 ###################### setup for real-time evolution ###########################################
 setup = let 
@@ -215,9 +202,9 @@ uT.wrt("------------------------- Time evolution --------------------")
 if @isdefined(walltime)
     tlim = walltime-(time()-StartComputeTime)
 else 
-tlim = 40
+tlim = 400
 end
-uT.wrt("Time limit for uTEBD calclation is: $(round(tlim,digits=2)) seconds")
+uT.wrt("Time limit for uTEBD calclation is: $(round(tlim-30,digits=2)) seconds")
 
 # if running on cluster move to GPU
 if Sys.islinux()
