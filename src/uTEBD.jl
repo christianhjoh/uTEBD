@@ -721,7 +721,7 @@ function TEBD(sysDef;time_lim = Inf)
                 # end
                 
                 if mflag
-                    str = "iter: $(iter)/$(Nsteps), sim. time: $(round(tlist[iter],sigdigits=2))/$(round(tlist[end],sigdigits=2)), time for $(obsΔ) steps: $(round(time()-t0,sigdigits=2)) sec,"
+                    str = "iter: $(iter)/$(Nsteps), sim. time: $(round(tlist[iter],sigdigits=3))/$(round(tlist[end],sigdigits=3)), time for $(obsΔ) steps: $(round(time()-t0,sigdigits=2)) sec,"
                     if "λ" ∈ monitor["Obs"]
                         str *= " Bond dim. = $(length(obs.λ[iterObs-1])),"
                     end
